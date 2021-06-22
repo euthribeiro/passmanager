@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 import { useForm } from 'react-hook-form';
 import { RFValue } from 'react-native-responsive-fontsize';
 import * as Yup from 'yup';
@@ -10,13 +10,13 @@ import uuid from 'react-native-uuid';
 import { Input } from '../../components/Form/Input';
 import { Button } from '../../components/Form/Button';
 
+import { LoginDataProps } from '../Home';
+
 import {
   Container,
   HeaderTitle,
   Form
 } from './styles';
-import { LoginDataProps } from '../Home';
-import { useStorageData } from '../../hooks/storagedata';
 
 interface FormData {
   title: string;
@@ -31,8 +31,6 @@ const schema = Yup.object().shape({
 })
 
 export function RegisterLoginData() {
-
-  const { setLoginData } = useStorageData();
 
   const {
     control,
@@ -51,10 +49,17 @@ export function RegisterLoginData() {
       ...formData
     }
 
-    await setLoginData(newLoginData);
+    // Save data on AsyncStorage
+    const loginsStoraged = await AsyncStorage.getItem('@passmanager:logins');
+
+    if(loginsStoraged) {
+      const logins: LoginDataProps[] = JSON.parse(loginsStoraged);
+      await AsyncStorage.setItem('@passmanager:logins', JSON.stringify([...logins, newLoginData]));
+    } else {
+      await AsyncStorage.setItem('@passmanager:logins', JSON.stringify([newLoginData]));
+    }
 
     reset();
-    // Save data on AsyncStorage
   }
 
   return (
