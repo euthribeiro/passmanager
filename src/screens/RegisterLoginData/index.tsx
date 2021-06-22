@@ -15,6 +15,7 @@ import {
   HeaderTitle,
   Form
 } from './styles';
+import { LoginDataProps } from '../Home';
 
 interface FormData {
   title: string;
@@ -36,7 +37,9 @@ export function RegisterLoginData() {
     formState: {
       errors
     }
-  } = useForm();
+  } = useForm({
+    resolver: yupResolver(schema)
+  });
 
   async function handleRegister(formData: FormData) {
     const newLoginData = {
@@ -44,6 +47,16 @@ export function RegisterLoginData() {
       ...formData
     }
 
+    const loginsStoraged = await AsyncStorage.getItem('@passmanager:logins');
+
+    if(loginsStoraged) {
+      const logins: LoginDataProps[] = JSON.parse(loginsStoraged);
+      await AsyncStorage.setItem('@passmanager:logins', JSON.stringify([...logins, newLoginData]));
+    } else {
+      await AsyncStorage.setItem('@passmanager:logins', JSON.stringify([newLoginData]));
+    }
+
+    reset();
     // Save data on AsyncStorage
   }
 
@@ -60,9 +73,7 @@ export function RegisterLoginData() {
           <Input
             title="Título"
             name="title"
-            error={
-              // message error here
-            }
+            error={errors.title && errors.title.message}
             control={control}
             placeholder="Escreva o título aqui"
             autoCapitalize="sentences"
@@ -71,9 +82,7 @@ export function RegisterLoginData() {
           <Input
             title="Email"
             name="email"
-            error={
-              // message error here
-            }
+            error={errors.email && errors.email.message}
             control={control}
             placeholder="Escreva o Email aqui"
             autoCorrect={false}
@@ -83,9 +92,7 @@ export function RegisterLoginData() {
           <Input
             title="Senha"
             name="password"
-            error={
-              // message error here
-            }
+            error={errors.password && errors.password.message}
             control={control}
             secureTextEntry
             placeholder="Escreva a senha aqui"
