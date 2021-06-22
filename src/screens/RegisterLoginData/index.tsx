@@ -16,6 +16,7 @@ import {
   Form
 } from './styles';
 import { LoginDataProps } from '../Home';
+import { useStorageData } from '../../hooks/storagedata';
 
 interface FormData {
   title: string;
@@ -30,6 +31,9 @@ const schema = Yup.object().shape({
 })
 
 export function RegisterLoginData() {
+
+  const { setLoginData } = useStorageData();
+
   const {
     control,
     handleSubmit,
@@ -47,14 +51,7 @@ export function RegisterLoginData() {
       ...formData
     }
 
-    const loginsStoraged = await AsyncStorage.getItem('@passmanager:logins');
-
-    if(loginsStoraged) {
-      const logins: LoginDataProps[] = JSON.parse(loginsStoraged);
-      await AsyncStorage.setItem('@passmanager:logins', JSON.stringify([...logins, newLoginData]));
-    } else {
-      await AsyncStorage.setItem('@passmanager:logins', JSON.stringify([newLoginData]));
-    }
+    await setLoginData(newLoginData);
 
     reset();
     // Save data on AsyncStorage

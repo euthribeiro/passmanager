@@ -11,6 +11,8 @@ import {
   EmptyListContainer,
   EmptyListMessage
 } from './styles';
+import { useStorageData } from '../../hooks/storagedata';
+import { Alert } from 'react-native';
 
 export interface LoginDataProps {
   id: string;
@@ -22,18 +24,20 @@ export interface LoginDataProps {
 type LoginListDataProps = LoginDataProps[];
 
 export function Home() {
+  const { getLoginData } = useStorageData();
   const [searchListData, setSearchListData] = useState<LoginListDataProps>([]);
   const [data, setData] = useState<LoginListDataProps>([]);
 
   async function loadData() {
     // Get asyncStorage data, use setSearchListData and setData
 
-    const loginsStoraged = await AsyncStorage.getItem('@passmanager:logins');
+    try {
+      const logins = await getLoginData();
 
-    if(loginsStoraged) {
-      const logins: LoginListDataProps = JSON.parse(loginsStoraged);
       setSearchListData(logins);
       setData(logins);
+    } catch(e) {
+      Alert.alert('Dados', 'Falha ao localizar dados');
     }
   }
 
